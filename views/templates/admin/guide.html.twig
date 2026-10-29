@@ -1,0 +1,141 @@
+{% extends '@Modules/ppcloudflare/views/templates/admin/_layout.html.twig' %}
+
+{% block ppcf_content %}
+  <div class="row">
+    <div class="col-xl-8">
+      <div class="card">
+        <h3 class="card-header">
+          <i class="material-icons">vpn_key</i>
+          {{ 'Create a Cloudflare API token'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+        </h3>
+        <div class="card-body ppcf-guide">
+          <ol class="ppcf-steps">
+            <li>
+              {{ 'Log in to the Cloudflare dashboard at %link%.'|trans({'%link%': '<a href="https://dash.cloudflare.com/profile/api-tokens" target="_blank" rel="noopener noreferrer">dash.cloudflare.com</a>'}, 'Modules.Ppcloudflare.Admin')|raw }}
+            </li>
+            <li>
+              {{ 'Open My Profile (top right) > API Tokens and click "Create Token".'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+            </li>
+            <li>
+              {{ 'At the bottom of the template list, next to "Create Custom Token", click "Get started".'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+            </li>
+            <li>
+              {{ 'Token name: anything you will recognise later, for example "PrestaShop cache purge".'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+            </li>
+            <li>
+              {{ 'Permissions: add these rows (use "+ Add more" for each row):'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+              <table class="table table-sm table-bordered ppcf-perm-table mt-2">
+                <thead>
+                  <tr>
+                    <th>{{ 'Type'|trans({}, 'Modules.Ppcloudflare.Admin') }}</th>
+                    <th>{{ 'Item'|trans({}, 'Modules.Ppcloudflare.Admin') }}</th>
+                    <th>{{ 'Access'|trans({}, 'Modules.Ppcloudflare.Admin') }}</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Zone</td><td>Zone</td><td>Read</td>
+                    <td><span class="badge badge-danger">{{ 'Required'|trans({}, 'Modules.Ppcloudflare.Admin') }}</span> {{ 'lists your zones'|trans({}, 'Modules.Ppcloudflare.Admin') }}</td>
+                  </tr>
+                  <tr>
+                    <td>Zone</td><td>Cache Purge</td><td>Purge</td>
+                    <td><span class="badge badge-danger">{{ 'Required'|trans({}, 'Modules.Ppcloudflare.Admin') }}</span> {{ 'purges the cache'|trans({}, 'Modules.Ppcloudflare.Admin') }}</td>
+                  </tr>
+                  <tr>
+                    <td>Zone</td><td>Zone Settings</td><td>Edit</td>
+                    <td><span class="badge badge-secondary">{{ 'Optional'|trans({}, 'Modules.Ppcloudflare.Admin') }}</span> {{ 'Development Mode and "I\'m Under Attack" tools'|trans({}, 'Modules.Ppcloudflare.Admin') }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </li>
+            <li>
+              {{ 'Zone Resources: choose "Include" > "All zones from an account" and select your account. To limit the token, choose "Include" > "Specific zone" and add one row per shop domain.'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+            </li>
+            <li>
+              {{ 'Client IP Address Filtering (optional): if you restrict the token to IP addresses, include the outbound IP address of this web server, or every call from PrestaShop will be refused. Ask your hosting provider if you do not know it; PrestaShop cannot detect it reliably. Leave it empty if unsure.'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+            </li>
+            <li>
+              {{ 'TTL (optional): leave it empty for a token that does not expire, or set an end date and remember to create a new token before it.'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+            </li>
+            <li>
+              {{ 'Click "Continue to summary", check the permissions, then click "Create Token".'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+            </li>
+            <li>
+              <strong>{{ 'Copy the token now.'|trans({}, 'Modules.Ppcloudflare.Admin') }}</strong>
+              {{ 'Cloudflare shows it only once. If you lose it, use "Roll" on the token to get a new value.'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+            </li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-header">
+          <i class="material-icons">settings_input_component</i>
+          {{ 'Connect PrestaShop'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+        </h3>
+        <div class="card-body ppcf-guide">
+          <ol class="ppcf-steps">
+            <li>
+              {{ 'Paste the token in "API token" on the Settings tab and save. It is stored encrypted.'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+              <a href="{{ path('ps_ppcloudflare_configure') }}">{{ 'Settings'|trans({}, 'Modules.Ppcloudflare.Admin') }}</a>
+            </li>
+            <li>
+              {{ 'Click "Test token": it must report a valid token and at least one zone.'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+            </li>
+            <li>
+              {{ 'On "Shops & zones", click "Fetch zones from Cloudflare", then "Auto-detect" (or choose the zone of each shop yourself) and save.'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+              <a href="{{ path('ps_ppcloudflare_zones') }}">{{ 'Shops & zones'|trans({}, 'Modules.Ppcloudflare.Admin') }}</a>
+            </li>
+            <li>
+              {{ 'On "Tools", click "Purge everything now" for one shop and check the result on the "Purge log" tab.'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+              <a href="{{ path('ps_ppcloudflare_tools') }}">{{ 'Tools'|trans({}, 'Modules.Ppcloudflare.Admin') }}</a>
+            </li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-4">
+      <div class="card">
+        <h3 class="card-header">
+          <i class="material-icons">gpp_maybe</i>
+          {{ 'Why not the Global API Key?'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+        </h3>
+        <div class="card-body">
+          <p>{{ 'The Global API Key gives full control of your whole Cloudflare account: DNS, SSL, billing, every site. Anyone who reads it from a backup or a compromised server owns the account.'|trans({}, 'Modules.Ppcloudflare.Admin') }}</p>
+          <p class="mb-0">{{ 'An API token is limited to the permissions and zones you choose, can be restricted to your server IP and revoked at any time without touching anything else. This module only accepts API tokens.'|trans({}, 'Modules.Ppcloudflare.Admin') }}</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-header">
+          <i class="material-icons">terminal</i>
+          {{ 'Deploy scripts'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+        </h3>
+        <div class="card-body">
+          <p>{{ 'Purge every linked shop from the command line, for example at the end of a deployment:'|trans({}, 'Modules.Ppcloudflare.Admin') }}</p>
+          <pre class="ppcf-code"><code>{{ consoleCommand }}</code></pre>
+          <p>{{ 'Purge one shop, or only some URLs:'|trans({}, 'Modules.Ppcloudflare.Admin') }}</p>
+          <pre class="ppcf-code"><code>php bin/console ppcloudflare:purge --shop=1
+php bin/console ppcloudflare:purge --shop=1 --url=https://www.example.com/</code></pre>
+          <p class="small text-muted mb-0">{{ 'Run it from the PrestaShop root directory with the same PHP binary as the shop.'|trans({}, 'Modules.Ppcloudflare.Admin') }}</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-header">
+          <i class="material-icons">info</i>
+          {{ 'Good to know'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+        </h3>
+        <div class="card-body">
+          <ul class="mb-0 ppcf-list">
+            <li>{{ 'Cloudflare caches only what your cache rules allow. By default, HTML pages are not cached; static files (images, CSS, JS) are.'|trans({}, 'Modules.Ppcloudflare.Admin') }}</li>
+            <li>{{ 'A full purge makes the next visits slower until the cache warms up again. Prefer the content triggers to purging everything.'|trans({}, 'Modules.Ppcloudflare.Admin') }}</li>
+            <li>{{ 'Several shops on one zone: use the "Hostnames" or "URL prefix" scope so a purge of one shop does not empty the others.'|trans({}, 'Modules.Ppcloudflare.Admin') }}</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

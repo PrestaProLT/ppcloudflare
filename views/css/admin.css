@@ -1,0 +1,39 @@
+/* Cloudflare integration for PrestaShop 9 — back-office styles (scoped to .ppcf). */
+.ppcf .ppcf-nav { flex-wrap: wrap; gap: .25rem; }
+.ppcf .ppcf-nav .nav-link { display: inline-flex; align-items: center; gap: .35rem; }
+.ppcf .ppcf-nav .material-icons { font-size: 1.15rem; }
+.ppcf .card { margin-bottom: 1rem; }
+.ppcf .card-header .material-icons { vertical-align: middle; font-size: 1.25rem; margin-right: .25rem; }
+.ppcf .card-header small { margin-left: .5rem; font-weight: normal; }
+.ppcf .card-header form { margin: 0; }
+.ppcf .ppcf-subtitle { font-size: .95rem; font-weight: 600; margin: 1rem 0 .5rem; }
+.ppcf .card-body > .ppcf-subtitle:first-child, .ppcf .col-lg-3 > .ppcf-subtitle, .ppcf .col-lg-4 > .ppcf-subtitle, .ppcf .col-lg-5 > .ppcf-subtitle { margin-top: 0; }
+.ppcf .ppcf-token-state { display: inline-flex; align-items: center; gap: .25rem; font-size: .85rem; padding: .35rem .6rem; }
+.ppcf .ppcf-token-state .material-icons { font-size: 1rem; }
+.ppcf .ppcf-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; }
+.ppcf .ppcf-toolbar form { margin: 0; }
+.ppcf .btn .material-icons { font-size: 1.1rem; vertical-align: middle; }
+.ppcf .ppcf-shops td { vertical-align: top; }
+.ppcf .ppcf-shops select { min-width: 220px; }
+.ppcf .ppcf-apply-suggestion { text-decoration: none; }
+.ppcf .ppcf-help { border-top: 1px solid #dfe3e7; padding-top: .75rem; }
+.ppcf .ppcf-actions { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+.ppcf .ppcf-actions form { margin: 0; }
+.ppcf .ppcf-restore { display: inline-flex; gap: .25rem; }
+.ppcf .ppcf-restore select { width: auto; }
+.ppcf .ppcf-state { margin-bottom: .5rem; }
+.ppcf .ppcf-state .badge { font-size: .8rem; }
+.ppcf .ppcf-log td { vertical-align: top; }
+.ppcf .ppcf-log summary { cursor: pointer; color: #25b9d7; }
+.ppcf .ppcf-items { margin: .25rem 0 0; padding-left: 1rem; max-width: 420px; word-break: break-all; font-size: .8rem; }
+.ppcf .ppcf-message { max-width: 360px; word-break: break-word; }
+.ppcf .ppcf-filter-buttons { gap: .5rem; }
+.ppcf .ppcf-steps > li { margin-bottom: .75rem; }
+.ppcf .ppcf-perm-table { max-width: 640px; }
+.ppcf .ppcf-code { background: #363a41; color: #fff; padding: .6rem .75rem; border-radius: 4px; white-space: pre-wrap; word-break: break-all; }
+.ppcf .ppcf-code code { color: inherit; background: none; }
+.ppcf .ppcf-list li { margin-bottom: .5rem; }
+.ppcf .ppcf-callout .alert-text a { font-weight: 600; }
+.ppcf .card-header small { font-size: .8125rem; }
+.ppcf .ppcf-custom .form-group { max-width: 760px; }
+.ppcf .ppcf-custom .form-control-label { display: block; font-weight: 600; margin-bottom: .25rem; }

@@ -1,0 +1,190 @@
+{% extends '@Modules/ppcloudflare/views/templates/admin/_layout.html.twig' %}
+
+{% block ppcf_content %}
+  {% set csrf %}{% include '@Modules/ppcloudflare/views/templates/admin/_csrf.html.twig' %}{% endset %}
+
+  <div class="card">
+    <h3 class="card-header d-flex align-items-center justify-content-between">
+      <span><i class="material-icons">delete_sweep</i> {{ 'Purge cache'|trans({}, 'Modules.Ppcloudflare.Admin') }}</span>
+      <form method="post" action="{{ path('ps_ppcloudflare_tools_purge_all') }}" class="ppcf-confirm"
+            data-confirm="{{ 'Purge the Cloudflare cache of every linked shop now?'|trans({}, 'Modules.Ppcloudflare.Admin') }}">
+        {{ csrf }}
+        <button type="submit" class="btn btn-danger btn-sm"{{ zones is empty or not ppcfHasToken ? ' disabled' : '' }}>
+          <i class="material-icons">delete_forever</i>
+          {{ 'Purge all shops'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+        </button>
+      </form>
+    </h3>
+    <div class="card-body">
+      {% if zones is empty %}
+        <p class="text-muted mb-0">
+          {{ 'No shop is linked to a Cloudflare zone yet.'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+          <a href="{{ path('ps_ppcloudflare_zones') }}">{{ 'Link shops to zones'|trans({}, 'Modules.Ppcloudflare.Admin') }}</a>
+        </p>
+      {% else %}
+        <p class="text-muted">{{ 'Manual purges ignore the debounce setting. Development Mode and the security level apply to the whole zone, so shops sharing a zone are grouped together.'|trans({}, 'Modules.Ppcloudflare.Admin') }}</p>
+      {% endif %}
+    </div>
+  </div>
+
+  {% for zone in zones %}
+    <div class="card ppcf-zone" data-zone-id="{{ zone.id }}" data-status-url="{{ path('ps_ppcloudflare_tools_status', {'zone_id': zone.id}) }}">
+      <h3 class="card-header">
+        <i class="material-icons">language</i>
+        {{ zone.name }}
+        {% if zone.plan %}<span class="badge badge-secondary">{{ zone.plan }}</span>{% endif %}
+        {% if zone.status and zone.status != 'active' %}<span class="badge badge-warning">{{ zone.status }}</span>{% endif %}
+      </h3>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-lg-5">
+            <h4 class="ppcf-subtitle">{{ 'Shops'|trans({}, 'Modules.Ppcloudflare.Admin') }}</h4>
+            <table class="table table-sm">
+              <tbody>
+                {% for shop in zone.shops %}
+                  <tr>
+                    <td>
+                      <strong>{{ shop.name }}</strong>
+                      <div class="small text-muted">
+                        {% if shop.scope == 'zone' %}{{ 'Scope: whole zone'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+                        {% elseif shop.scope == 'host' %}{{ 'Scope: hostnames'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+                        {% else %}{{ 'Scope: URL prefix'|trans({}, 'Modules.Ppcloudflare.Admin') }}{% endif %}
+                      </div>
+                    </td>
+                    <td class="text-right">
+                      <form method="post" action="{{ path('ps_ppcloudflare_tools_purge_shop') }}" class="ppcf-confirm"
+                            data-confirm="{{ 'Purge the Cloudflare cache of this shop now?'|trans({}, 'Modules.Ppcloudflare.Admin') }}">
+                        {{ csrf }}
+                        <input type="hidden" name="id_shop" value="{{ shop.id_shop }}">
+                        <button type="submit" class="btn btn-outline-danger btn-sm"{{ ppcfHasToken ? '' : ' disabled' }}>
+                          <i class="material-icons">delete_sweep</i>
+                          {{ 'Purge everything now'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="col-lg-3">
+            <h4 class="ppcf-subtitle">{{ 'Development Mode'|trans({}, 'Modules.Ppcloudflare.Admin') }}</h4>
+            <p class="ppcf-state" data-setting="development_mode">
+              <span class="ppcf-state-value text-muted">{{ 'Loading…'|trans({}, 'Modules.Ppcloudflare.Admin') }}</span>
+            </p>
+            <div class="ppcf-actions">
+              <form method="post" action="{{ path('ps_ppcloudflare_tools_dev_mode') }}">
+                {{ csrf }}
+                <input type="hidden" name="zone_id" value="{{ zone.id }}">
+                <input type="hidden" name="value" value="on">
+                <button type="submit" class="btn btn-outline-primary btn-sm"{{ ppcfHasToken ? '' : ' disabled' }}>{{ 'Turn on'|trans({}, 'Modules.Ppcloudflare.Admin') }}</button>
+              </form>
+              <form method="post" action="{{ path('ps_ppcloudflare_tools_dev_mode') }}">
+                {{ csrf }}
+                <input type="hidden" name="zone_id" value="{{ zone.id }}">
+                <input type="hidden" name="value" value="off">
+                <button type="submit" class="btn btn-outline-secondary btn-sm"{{ ppcfHasToken ? '' : ' disabled' }}>{{ 'Turn off'|trans({}, 'Modules.Ppcloudflare.Admin') }}</button>
+              </form>
+            </div>
+            <p class="small text-muted mt-2">{{ 'Bypasses the Cloudflare cache so changes show at once. Cloudflare turns it off automatically after 3 hours.'|trans({}, 'Modules.Ppcloudflare.Admin') }}</p>
+          </div>
+
+          <div class="col-lg-4">
+            <h4 class="ppcf-subtitle">{{ 'Security level'|trans({}, 'Modules.Ppcloudflare.Admin') }}</h4>
+            <p class="ppcf-state" data-setting="security_level">
+              <span class="ppcf-state-value text-muted">{{ 'Loading…'|trans({}, 'Modules.Ppcloudflare.Admin') }}</span>
+            </p>
+            <div class="ppcf-actions">
+              <form method="post" action="{{ path('ps_ppcloudflare_tools_security_level') }}" class="ppcf-confirm"
+                    data-confirm="{{ 'Turn on I\'m Under Attack mode? Every visitor gets a browser check before the shop loads.'|trans({}, 'Modules.Ppcloudflare.Admin') }}">
+                {{ csrf }}
+                <input type="hidden" name="zone_id" value="{{ zone.id }}">
+                <input type="hidden" name="value" value="under_attack">
+                <button type="submit" class="btn btn-outline-danger btn-sm"{{ ppcfHasToken ? '' : ' disabled' }}>
+                  <i class="material-icons">shield</i>
+                  {{ 'I\'m Under Attack'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+                </button>
+              </form>
+              <form method="post" action="{{ path('ps_ppcloudflare_tools_security_level') }}" class="form-inline ppcf-restore">
+                {{ csrf }}
+                <input type="hidden" name="zone_id" value="{{ zone.id }}">
+                <select name="value" class="custom-select custom-select-sm" aria-label="{{ 'Restore to'|trans({}, 'Modules.Ppcloudflare.Admin') }}">
+                  <option value="essentially_off">{{ 'Essentially off'|trans({}, 'Modules.Ppcloudflare.Admin') }}</option>
+                  <option value="low">{{ 'Low'|trans({}, 'Modules.Ppcloudflare.Admin') }}</option>
+                  <option value="medium" selected>{{ 'Medium'|trans({}, 'Modules.Ppcloudflare.Admin') }}</option>
+                  <option value="high">{{ 'High'|trans({}, 'Modules.Ppcloudflare.Admin') }}</option>
+                </select>
+                <button type="submit" class="btn btn-outline-secondary btn-sm"{{ ppcfHasToken ? '' : ' disabled' }}>{{ 'Restore'|trans({}, 'Modules.Ppcloudflare.Admin') }}</button>
+              </form>
+            </div>
+            <p class="small text-muted mt-2">{{ 'Changing these settings needs the "Zone Settings · Edit" token permission.'|trans({}, 'Modules.Ppcloudflare.Admin') }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+
+  <form method="post" action="{{ path('ps_ppcloudflare_tools_custom_purge') }}" class="card ppcf-custom">
+    {{ csrf }}
+    <h3 class="card-header">
+      <i class="material-icons">playlist_remove</i>
+      {{ 'Custom purge'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+    </h3>
+    <div class="card-body">
+      {% if customZones is empty %}
+        <p class="text-muted mb-0">{{ 'Fetch the zones on the "Shops & zones" tab first.'|trans({}, 'Modules.Ppcloudflare.Admin') }}</p>
+      {% else %}
+        <div class="form-group">
+          <label class="form-control-label" for="ppcf-custom-zone">{{ 'Zone'|trans({}, 'Modules.Ppcloudflare.Admin') }}</label>
+          <select name="zone_id" id="ppcf-custom-zone" class="custom-select" required>
+              {% for id, name in customZones %}
+                <option value="{{ id }}">{{ name }}</option>
+              {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="ppcf-custom-type">{{ 'Purge by'|trans({}, 'Modules.Ppcloudflare.Admin') }}</label>
+            <select name="type" id="ppcf-custom-type" class="custom-select">
+              <option value="files" data-placeholder="https://www.example.com/en/some-page.html">{{ 'URLs'|trans({}, 'Modules.Ppcloudflare.Admin') }}</option>
+              <option value="hosts" data-placeholder="www.example.com">{{ 'Hostnames'|trans({}, 'Modules.Ppcloudflare.Admin') }}</option>
+              <option value="prefixes" data-placeholder="www.example.com/img/">{{ 'URL prefixes'|trans({}, 'Modules.Ppcloudflare.Admin') }}</option>
+              <option value="tags" data-placeholder="product-42">{{ 'Cache tags'|trans({}, 'Modules.Ppcloudflare.Admin') }}</option>
+            </select>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="ppcf-custom-items">{{ 'Items'|trans({}, 'Modules.Ppcloudflare.Admin') }}</label>
+            <textarea name="items" id="ppcf-custom-items" class="form-control" rows="6" required placeholder="https://www.example.com/en/some-page.html"></textarea>
+            <small class="form-text">{{ 'One per line. Sent to Cloudflare in batches of 30.'|trans({}, 'Modules.Ppcloudflare.Admin') }}</small>
+        </div>
+      {% endif %}
+    </div>
+    {% if customZones is not empty %}
+      <div class="card-footer">
+        <div class="d-flex justify-content-end">
+          <button type="submit" class="btn btn-primary"{{ ppcfHasToken ? '' : ' disabled' }}>
+            <i class="material-icons">send</i>
+            {{ 'Purge'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+          </button>
+        </div>
+      </div>
+    {% endif %}
+  </form>
+
+  <script>
+    window.ppcloudflareI18n = {
+      on: {{ 'On'|trans({}, 'Modules.Ppcloudflare.Admin')|json_encode|raw }},
+      off: {{ 'Off'|trans({}, 'Modules.Ppcloudflare.Admin')|json_encode|raw }},
+      current: {{ 'Current:'|trans({}, 'Modules.Ppcloudflare.Admin')|json_encode|raw }},
+      error: {{ 'Could not read the setting:'|trans({}, 'Modules.Ppcloudflare.Admin')|json_encode|raw }},
+      levels: {
+        under_attack: {{ 'I\'m Under Attack'|trans({}, 'Modules.Ppcloudflare.Admin')|json_encode|raw }},
+        essentially_off: {{ 'Essentially off'|trans({}, 'Modules.Ppcloudflare.Admin')|json_encode|raw }},
+        off: {{ 'Off'|trans({}, 'Modules.Ppcloudflare.Admin')|json_encode|raw }},
+        low: {{ 'Low'|trans({}, 'Modules.Ppcloudflare.Admin')|json_encode|raw }},
+        medium: {{ 'Medium'|trans({}, 'Modules.Ppcloudflare.Admin')|json_encode|raw }},
+        high: {{ 'High'|trans({}, 'Modules.Ppcloudflare.Admin')|json_encode|raw }}
+      }
+    };
+  </script>
+{% endblock %}

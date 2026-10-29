@@ -1,0 +1,21 @@
+{
+    "name": "prestapro/ppcloudflare",
+    "description": "Cloudflare integration for PrestaShop 9: automatic cache purge, multistore zone mapping, Development Mode and Under Attack tools.",
+    "type": "prestashop-module",
+    "license": "AFL-3.0",
+    "authors": [{ "name": "PrestaPro" }],
+    "keywords": ["prestashop", "prestashop-9", "prestashop-module", "cloudflare", "cache", "cdn", "purge"],
+    "require": {
+        "php": ">=8.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "PrestaShop\\Module\\PpCloudflare\\": "src/"
+        }
+    },
+    "config": {
+        "preferred-install": "dist",
+        "prepend-autoloader": false,
+        "optimize-autoloader": true
+    }
+}

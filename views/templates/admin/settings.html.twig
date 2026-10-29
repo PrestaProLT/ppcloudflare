@@ -1,0 +1,113 @@
+{% extends '@Modules/ppcloudflare/views/templates/admin/_layout.html.twig' %}
+{% form_theme settingsForm '@PrestaShop/Admin/TwigTemplateForm/prestashop_ui_kit.html.twig' %}
+
+{% block ppcf_content %}
+  <div class="row">
+    <div class="col-xl-8">
+      {{ form_start(settingsForm) }}
+
+      <div class="card">
+        <h3 class="card-header">
+          <i class="material-icons">vpn_key</i>
+          {{ 'Cloudflare connection'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+        </h3>
+        <div class="card-body">
+          <div class="form-group row">
+            <label class="form-control-label">{{ 'Status'|trans({}, 'Modules.Ppcloudflare.Admin') }}</label>
+            <div class="col-sm">
+              {% if ppcfHasToken %}
+                <span class="badge badge-success ppcf-token-state">
+                  <i class="material-icons">check</i>
+                  {{ 'Token saved (ending …%last4%)'|trans({'%last4%': tokenHint}, 'Modules.Ppcloudflare.Admin') }}
+                </span>
+              {% else %}
+                <span class="badge badge-secondary ppcf-token-state">{{ 'No token'|trans({}, 'Modules.Ppcloudflare.Admin') }}</span>
+                {% if tokenStoredButUnreadable %}
+                  <p class="text-danger small mt-1 mb-0">{{ 'A token is stored but cannot be decrypted (the shop encryption key changed). Paste the token again.'|trans({}, 'Modules.Ppcloudflare.Admin') }}</p>
+                {% endif %}
+              {% endif %}
+            </div>
+          </div>
+          {{ form_row(settingsForm.api_token) }}
+          {% if ppcfHasToken %}
+            {{ form_row(settingsForm.remove_token) }}
+          {% else %}
+            {% do settingsForm.remove_token.setRendered %}
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-header">
+          <i class="material-icons">autorenew</i>
+          {{ 'Automatic purges'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+        </h3>
+        <div class="card-body">
+          {{ form_row(settingsForm.enabled) }}
+          {{ form_row(settingsForm.cache_clear_mode) }}
+          <h4 class="ppcf-subtitle">{{ 'Purge page URLs when content changes'|trans({}, 'Modules.Ppcloudflare.Admin') }}</h4>
+          {{ form_row(settingsForm.purge_product) }}
+          {{ form_row(settingsForm.purge_category) }}
+          {{ form_row(settingsForm.purge_cms) }}
+          {{ form_row(settingsForm.purge_manufacturer) }}
+          {{ form_row(settingsForm.purge_supplier) }}
+          {{ form_row(settingsForm.purge_stock) }}
+          {{ form_row(settingsForm.purge_homepage) }}
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-header">
+          <i class="material-icons">tune</i>
+          {{ 'Advanced'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+        </h3>
+        <div class="card-body">
+          {{ form_row(settingsForm.debounce_seconds) }}
+          {{ form_row(settingsForm.log_retention_days) }}
+          {{ form_rest(settingsForm) }}
+        </div>
+        <div class="card-footer">
+          <div class="d-flex justify-content-end">
+            <button class="btn btn-primary" type="submit">{{ 'Save'|trans({}, 'Admin.Actions') }}</button>
+          </div>
+        </div>
+      </div>
+
+      {{ form_end(settingsForm) }}
+    </div>
+
+    <div class="col-xl-4">
+      <div class="card">
+        <h3 class="card-header">
+          <i class="material-icons">verified_user</i>
+          {{ 'Test the token'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+        </h3>
+        <div class="card-body">
+          <p>{{ 'Checks the saved token with Cloudflare and counts the zones it can read.'|trans({}, 'Modules.Ppcloudflare.Admin') }}</p>
+          <form method="post" action="{{ path('ps_ppcloudflare_test_token') }}">
+            {% include '@Modules/ppcloudflare/views/templates/admin/_csrf.html.twig' %}
+            <button type="submit" class="btn btn-outline-primary"{{ ppcfHasToken ? '' : ' disabled' }}>
+              <i class="material-icons">network_check</i>
+              {{ 'Test token'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-header">
+          <i class="material-icons">help_outline</i>
+          {{ 'Next steps'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+        </h3>
+        <div class="card-body">
+          <ol class="ppcf-steps-short">
+            <li><a href="{{ path('ps_ppcloudflare_guide') }}">{{ 'Create an API token'|trans({}, 'Modules.Ppcloudflare.Admin') }}</a></li>
+            <li>{{ 'Paste it above and save'|trans({}, 'Modules.Ppcloudflare.Admin') }}</li>
+            <li><a href="{{ path('ps_ppcloudflare_zones') }}">{{ 'Fetch zones and link your shops'|trans({}, 'Modules.Ppcloudflare.Admin') }}</a></li>
+            <li><a href="{{ path('ps_ppcloudflare_tools') }}">{{ 'Try a purge on the Tools tab'|trans({}, 'Modules.Ppcloudflare.Admin') }}</a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

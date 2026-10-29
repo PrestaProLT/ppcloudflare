@@ -1,0 +1,11 @@
+/vendor/*
+!/vendor/autoload.php
+!/vendor/composer/
+!/vendor/index.php
+/.idea/
+/.vscode/
+/node_modules/
+.DS_Store
+*.zip
+/.phpunit.result.cache
+/.php-cs-fixer.cache

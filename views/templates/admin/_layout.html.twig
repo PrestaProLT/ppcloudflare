@@ -1,0 +1,44 @@
+{#
+ # Cloudflare integration for PrestaShop 9.
+ #
+ # Shared layout of every ppcloudflare admin page: in-page tab navigation,
+ # module assets and the "no token yet" callout.
+ #}
+{% extends '@PrestaShop/Admin/layout.html.twig' %}
+
+{% block stylesheets %}
+  {{ parent() }}
+  <link rel="stylesheet" href="{{ asset('../modules/ppcloudflare/views/css/admin.css') }}">
+{% endblock %}
+
+{% block content %}
+  <div class="ppcf">
+    <ul class="nav nav-pills ppcf-nav mb-3" role="tablist">
+      {% for tab in ppcfTabs %}
+        <li class="nav-item">
+          <a class="nav-link{{ tab.key == ppcfCurrentTab ? ' active' : '' }}" href="{{ path(tab.route) }}">
+            <i class="material-icons">{{ tab.icon }}</i>
+            {{ tab.title }}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+
+    {% if not ppcfHasToken and ppcfCurrentTab != 'guide' %}
+      <div class="alert alert-info ppcf-callout" role="alert">
+        <p class="alert-text">
+          <strong>{{ 'Connect your Cloudflare account first.'|trans({}, 'Modules.Ppcloudflare.Admin') }}</strong>
+          {{ 'Create an API token in Cloudflare and paste it on the Settings tab.'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+          <a href="{{ path('ps_ppcloudflare_guide') }}">{{ 'Open the setup guide'|trans({}, 'Modules.Ppcloudflare.Admin') }}</a>
+        </p>
+      </div>
+    {% endif %}
+
+    {% block ppcf_content %}{% endblock %}
+  </div>
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  <script src="{{ asset('../modules/ppcloudflare/views/js/admin.js') }}"></script>
+{% endblock %}

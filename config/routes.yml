@@ -1,0 +1,127 @@
+ps_ppcloudflare_configure:
+    path: /ppcloudflare/settings
+    methods: [GET, POST]
+    defaults:
+        _controller: 'PrestaShop\Module\PpCloudflare\Controller\Admin\SettingsController::index'
+        _legacy_controller: 'AdminPpCloudflareSettings'
+        _legacy_link: 'AdminPpCloudflareSettings'
+
+ps_ppcloudflare_test_token:
+    path: /ppcloudflare/settings/test-token
+    methods: [POST]
+    defaults:
+        _controller: 'PrestaShop\Module\PpCloudflare\Controller\Admin\SettingsController::testToken'
+        _legacy_controller: 'AdminPpCloudflareSettings'
+        _legacy_link: 'AdminPpCloudflareSettings:testToken'
+
+ps_ppcloudflare_zones:
+    path: /ppcloudflare/zones
+    methods: [GET]
+    defaults:
+        _controller: 'PrestaShop\Module\PpCloudflare\Controller\Admin\ZonesController::index'
+        _legacy_controller: 'AdminPpCloudflareZones'
+        _legacy_link: 'AdminPpCloudflareZones'
+
+ps_ppcloudflare_zones_fetch:
+    path: /ppcloudflare/zones/fetch
+    methods: [POST]
+    defaults:
+        _controller: 'PrestaShop\Module\PpCloudflare\Controller\Admin\ZonesController::fetch'
+        _legacy_controller: 'AdminPpCloudflareZones'
+        _legacy_link: 'AdminPpCloudflareZones:fetch'
+
+ps_ppcloudflare_zones_autodetect:
+    path: /ppcloudflare/zones/auto-detect
+    methods: [POST]
+    defaults:
+        _controller: 'PrestaShop\Module\PpCloudflare\Controller\Admin\ZonesController::autodetect'
+        _legacy_controller: 'AdminPpCloudflareZones'
+        _legacy_link: 'AdminPpCloudflareZones:autodetect'
+
+ps_ppcloudflare_zones_save:
+    path: /ppcloudflare/zones/save
+    methods: [POST]
+    defaults:
+        _controller: 'PrestaShop\Module\PpCloudflare\Controller\Admin\ZonesController::save'
+        _legacy_controller: 'AdminPpCloudflareZones'
+        _legacy_link: 'AdminPpCloudflareZones:save'
+
+ps_ppcloudflare_tools:
+    path: /ppcloudflare/tools
+    methods: [GET]
+    defaults:
+        _controller: 'PrestaShop\Module\PpCloudflare\Controller\Admin\ToolsController::index'
+        _legacy_controller: 'AdminPpCloudflareTools'
+        _legacy_link: 'AdminPpCloudflareTools'
+
+ps_ppcloudflare_tools_status:
+    path: /ppcloudflare/tools/status
+    methods: [GET]
+    defaults:
+        _controller: 'PrestaShop\Module\PpCloudflare\Controller\Admin\ToolsController::status'
+        _legacy_controller: 'AdminPpCloudflareTools'
+        _legacy_link: 'AdminPpCloudflareTools:status'
+
+ps_ppcloudflare_tools_purge_shop:
+    path: /ppcloudflare/tools/purge-shop
+    methods: [POST]
+    defaults:
+        _controller: 'PrestaShop\Module\PpCloudflare\Controller\Admin\ToolsController::purgeShop'
+        _legacy_controller: 'AdminPpCloudflareTools'
+        _legacy_link: 'AdminPpCloudflareTools:purgeShop'
+
+ps_ppcloudflare_tools_purge_all:
+    path: /ppcloudflare/tools/purge-all
+    methods: [POST]
+    defaults:
+        _controller: 'PrestaShop\Module\PpCloudflare\Controller\Admin\ToolsController::purgeAll'
+        _legacy_controller: 'AdminPpCloudflareTools'
+        _legacy_link: 'AdminPpCloudflareTools:purgeAll'
+
+ps_ppcloudflare_tools_dev_mode:
+    path: /ppcloudflare/tools/development-mode
+    methods: [POST]
+    defaults:
+        _controller: 'PrestaShop\Module\PpCloudflare\Controller\Admin\ToolsController::developmentMode'
+        _legacy_controller: 'AdminPpCloudflareTools'
+        _legacy_link: 'AdminPpCloudflareTools:developmentMode'
+
+ps_ppcloudflare_tools_security_level:
+    path: /ppcloudflare/tools/security-level
+    methods: [POST]
+    defaults:
+        _controller: 'PrestaShop\Module\PpCloudflare\Controller\Admin\ToolsController::securityLevel'
+        _legacy_controller: 'AdminPpCloudflareTools'
+        _legacy_link: 'AdminPpCloudflareTools:securityLevel'
+
+ps_ppcloudflare_tools_custom_purge:
+    path: /ppcloudflare/tools/custom-purge
+    methods: [POST]
+    defaults:
+        _controller: 'PrestaShop\Module\PpCloudflare\Controller\Admin\ToolsController::customPurge'
+        _legacy_controller: 'AdminPpCloudflareTools'
+        _legacy_link: 'AdminPpCloudflareTools:customPurge'
+
+ps_ppcloudflare_logs:
+    path: /ppcloudflare/logs
+    methods: [GET]
+    defaults:
+        _controller: 'PrestaShop\Module\PpCloudflare\Controller\Admin\LogsController::index'
+        _legacy_controller: 'AdminPpCloudflareLogs'
+        _legacy_link: 'AdminPpCloudflareLogs'
+
+ps_ppcloudflare_logs_clear:
+    path: /ppcloudflare/logs/clear
+    methods: [POST]
+    defaults:
+        _controller: 'PrestaShop\Module\PpCloudflare\Controller\Admin\LogsController::clear'
+        _legacy_controller: 'AdminPpCloudflareLogs'
+        _legacy_link: 'AdminPpCloudflareLogs:clear'
+
+ps_ppcloudflare_guide:
+    path: /ppcloudflare/guide
+    methods: [GET]
+    defaults:
+        _controller: 'PrestaShop\Module\PpCloudflare\Controller\Admin\GuideController::index'
+        _legacy_controller: 'AdminPpCloudflareGuide'
+        _legacy_link: 'AdminPpCloudflareGuide'

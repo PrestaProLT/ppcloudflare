@@ -1,0 +1,162 @@
+{% extends '@Modules/ppcloudflare/views/templates/admin/_layout.html.twig' %}
+
+{% block ppcf_content %}
+  <div class="card">
+    <h3 class="card-header">
+      <i class="material-icons">cloud_download</i>
+      {{ 'Cloudflare zones'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+    </h3>
+    <div class="card-body">
+      <div class="ppcf-toolbar">
+        <form method="post" action="{{ path('ps_ppcloudflare_zones_fetch') }}">
+          {% include '@Modules/ppcloudflare/views/templates/admin/_csrf.html.twig' %}
+          <button type="submit" class="btn btn-primary"{{ ppcfHasToken ? '' : ' disabled' }}>
+            <i class="material-icons">sync</i>
+            {{ 'Fetch zones from Cloudflare'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+          </button>
+        </form>
+        <form method="post" action="{{ path('ps_ppcloudflare_zones_autodetect') }}">
+          {% include '@Modules/ppcloudflare/views/templates/admin/_csrf.html.twig' %}
+          <button type="submit" class="btn btn-outline-secondary"{{ zones is empty ? ' disabled' : '' }}
+                  title="{{ 'Links every shop that is not linked yet to the zone that matches its domain.'|trans({}, 'Modules.Ppcloudflare.Admin') }}">
+            <i class="material-icons">auto_fix_high</i>
+            {{ 'Auto-detect'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+          </button>
+        </form>
+        <span class="text-muted ppcf-fetched">
+          {% if zonesFetchedAt %}
+            {{ '%count% zone(s), fetched on %date%'|trans({'%count%': zones|length, '%date%': zonesFetchedAt}, 'Modules.Ppcloudflare.Admin') }}
+          {% else %}
+            {{ 'Zones were not fetched yet.'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+          {% endif %}
+        </span>
+      </div>
+
+      {% if zones is not empty %}
+        <details class="ppcf-zone-list mt-3">
+          <summary>{{ 'Show fetched zones'|trans({}, 'Modules.Ppcloudflare.Admin') }}</summary>
+          <div class="table-responsive">
+            <table class="table table-sm mt-2">
+              <thead>
+                <tr>
+                  <th>{{ 'Zone'|trans({}, 'Modules.Ppcloudflare.Admin') }}</th>
+                  <th>{{ 'Status'|trans({}, 'Modules.Ppcloudflare.Admin') }}</th>
+                  <th>{{ 'Plan'|trans({}, 'Modules.Ppcloudflare.Admin') }}</th>
+                  <th>{{ 'Account'|trans({}, 'Modules.Ppcloudflare.Admin') }}</th>
+                  <th>{{ 'Zone ID'|trans({}, 'Modules.Ppcloudflare.Admin') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for zone in zones %}
+                  <tr>
+                    <td><strong>{{ zone.name }}</strong>{% if zone.paused|default(false) %} <span class="badge badge-warning">{{ 'Paused'|trans({}, 'Modules.Ppcloudflare.Admin') }}</span>{% endif %}</td>
+                    <td><span class="badge {{ zone.status == 'active' ? 'badge-success' : 'badge-secondary' }}">{{ zone.status }}</span></td>
+                    <td>{{ zone.plan }}</td>
+                    <td>{{ zone.account_name }}</td>
+                    <td><code>{{ zone.id }}</code></td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </details>
+      {% endif %}
+    </div>
+  </div>
+
+  {% for warning in sharedZoneWarnings %}
+    <div class="alert alert-warning" role="alert">
+      <p class="alert-text">
+        {{ 'Zone %zone% is shared by %shops%. A full purge of %zone_shops% (scope "Whole zone") also empties the cache of the other shops. Use the "Hostnames" or "URL prefix" scope to purge only one shop.'|trans({
+          '%zone%': warning.zone,
+          '%shops%': warning.shops|join(', '),
+          '%zone_shops%': warning.zone_scope_shops|join(', ')
+        }, 'Modules.Ppcloudflare.Admin') }}
+      </p>
+    </div>
+  {% endfor %}
+
+  <form method="post" action="{{ path('ps_ppcloudflare_zones_save') }}" class="card">
+    {% include '@Modules/ppcloudflare/views/templates/admin/_csrf.html.twig' %}
+    <h3 class="card-header">
+      <i class="material-icons">store</i>
+      {{ 'Shops'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+      <small class="text-muted">{{ 'All shops are listed, whatever shop context is selected.'|trans({}, 'Modules.Ppcloudflare.Admin') }}</small>
+    </h3>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table ppcf-shops">
+          <thead>
+            <tr>
+              <th>{{ 'Shop'|trans({}, 'Modules.Ppcloudflare.Admin') }}</th>
+              <th>{{ 'Domains'|trans({}, 'Modules.Ppcloudflare.Admin') }}</th>
+              <th>{{ 'Cloudflare zone'|trans({}, 'Modules.Ppcloudflare.Admin') }}</th>
+              <th>{{ 'Purge scope'|trans({}, 'Modules.Ppcloudflare.Admin') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for shop in shops %}
+              <tr>
+                <td>
+                  <strong>{{ shop.name }}</strong> <span class="text-muted">#{{ shop.id_shop }}</span>
+                  {% if not shop.active %}<span class="badge badge-secondary">{{ 'Inactive'|trans({}, 'Modules.Ppcloudflare.Admin') }}</span>{% endif %}
+                  {% if shop.group %}<div class="small text-muted">{{ 'Group: %group%'|trans({'%group%': shop.group}, 'Modules.Ppcloudflare.Admin') }}</div>{% endif %}
+                </td>
+                <td>
+                  {% for host in shop.hosts %}<div><code>{{ host }}</code></div>{% else %}<span class="text-muted">-</span>{% endfor %}
+                  <div class="small text-muted">{{ 'URI: %uri%'|trans({'%uri%': shop.uri}, 'Modules.Ppcloudflare.Admin') }}</div>
+                </td>
+                <td>
+                  <select name="zone[{{ shop.id_shop }}]" class="custom-select ppcf-zone-select" data-shop="{{ shop.id_shop }}">
+                    <option value="">{{ '— not linked —'|trans({}, 'Modules.Ppcloudflare.Admin') }}</option>
+                    {% for zone in zones %}
+                      <option value="{{ zone.id }}"{{ zone.id == shop.zone_id ? ' selected' : '' }}>{{ zone.name }}</option>
+                    {% endfor %}
+                    {% if shop.zone_id and (shop.zone_missing or zones is empty) %}
+                      <option value="{{ shop.zone_id }}" selected>{{ shop.zone_name }}{{ shop.zone_missing ? ' (' ~ ('not in the fetched list'|trans({}, 'Modules.Ppcloudflare.Admin')) ~ ')' : '' }}</option>
+                    {% endif %}
+                  </select>
+                  {% if shop.suggested_zone_id %}
+                    <div class="mt-1">
+                      {% if shop.suggested_zone_id == shop.zone_id %}
+                        <span class="badge badge-success">{{ 'Matches the shop domain'|trans({}, 'Modules.Ppcloudflare.Admin') }}</span>
+                      {% else %}
+                        <button type="button" class="btn btn-link btn-sm p-0 ppcf-apply-suggestion"
+                                data-shop="{{ shop.id_shop }}" data-zone="{{ shop.suggested_zone_id }}" data-scope="{{ shop.suggested_scope }}">
+                          <span class="badge badge-info">{{ 'Suggested: %zone% (%scope%)'|trans({'%zone%': shop.suggested_zone_name, '%scope%': shop.suggested_scope}, 'Modules.Ppcloudflare.Admin') }}</span>
+                        </button>
+                      {% endif %}
+                    </div>
+                  {% elseif zones is not empty and not shop.zone_id %}
+                    <div class="small text-muted mt-1">{{ 'No zone matches this shop domain.'|trans({}, 'Modules.Ppcloudflare.Admin') }}</div>
+                  {% endif %}
+                </td>
+                <td>
+                  <select name="scope[{{ shop.id_shop }}]" class="custom-select ppcf-scope-select" data-shop="{{ shop.id_shop }}">
+                    <option value="zone"{{ shop.scope == 'zone' ? ' selected' : '' }}>{{ 'Whole zone'|trans({}, 'Modules.Ppcloudflare.Admin') }}</option>
+                    <option value="host"{{ shop.scope == 'host' ? ' selected' : '' }}>{{ 'Hostnames of this shop'|trans({}, 'Modules.Ppcloudflare.Admin') }}</option>
+                    <option value="prefix"{{ shop.scope == 'prefix' ? ' selected' : '' }}>{{ 'URL prefix of this shop'|trans({}, 'Modules.Ppcloudflare.Admin') }}</option>
+                  </select>
+                </td>
+              </tr>
+            {% else %}
+              <tr><td colspan="4" class="text-muted">{{ 'No shop found.'|trans({}, 'Modules.Ppcloudflare.Admin') }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="ppcf-help small text-muted">
+        <p class="mb-1"><strong>{{ 'Whole zone'|trans({}, 'Modules.Ppcloudflare.Admin') }}</strong> — {{ 'a full purge empties the entire zone cache. Best when the zone serves only this shop.'|trans({}, 'Modules.Ppcloudflare.Admin') }}</p>
+        <p class="mb-1"><strong>{{ 'Hostnames of this shop'|trans({}, 'Modules.Ppcloudflare.Admin') }}</strong> — {{ 'purges only the shop domains (for example shop.example.com) when the zone also serves other sites.'|trans({}, 'Modules.Ppcloudflare.Admin') }}</p>
+        <p class="mb-0"><strong>{{ 'URL prefix of this shop'|trans({}, 'Modules.Ppcloudflare.Admin') }}</strong> — {{ 'purges only URLs under the shop folder (for example www.example.com/shop2/), for shops sharing one domain.'|trans({}, 'Modules.Ppcloudflare.Admin') }}</p>
+        <p class="mt-2 mb-0">{{ 'Purging by hostname or prefix is available on every Cloudflare plan, with lower rate limits on Free plans.'|trans({}, 'Modules.Ppcloudflare.Admin') }}</p>
+      </div>
+    </div>
+    <div class="card-footer">
+      <div class="d-flex justify-content-end">
+        <button type="submit" class="btn btn-primary"{{ shops is empty ? ' disabled' : '' }}>{{ 'Save'|trans({}, 'Admin.Actions') }}</button>
+      </div>
+    </div>
+  </form>
+{% endblock %}

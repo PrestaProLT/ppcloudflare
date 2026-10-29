@@ -1,0 +1,30 @@
+services:
+    _defaults:
+        public: true
+        autowire: true
+        autoconfigure: true
+
+    # Only Symfony-aware classes are scanned. Everything reachable from hooks
+    # (Api, Config, Hook, Log, Module, Purge, Zone) is plain PHP built with `new`,
+    # because actionClearSf2Cache runs after the container cache was deleted.
+    PrestaShop\Module\PpCloudflare\Controller\:
+        resource: '../src/Controller/'
+        tags: ['controller.service_arguments']
+
+    PrestaShop\Module\PpCloudflare\Form\:
+        resource: '../src/Form/'
+
+    PrestaShop\Module\PpCloudflare\Command\PurgeCommand:
+        class: PrestaShop\Module\PpCloudflare\Command\PurgeCommand
+        tags: ['console.command']
+
+    # Settings page: core form Handler wired to the module's FormType / data provider.
+    prestashop.module.ppcloudflare.form.settings_form_handler:
+        class: 'PrestaShop\PrestaShop\Core\Form\Handler'
+        arguments:
+            - '@form.factory'
+            - '@prestashop.core.hook.dispatcher'
+            - '@PrestaShop\Module\PpCloudflare\Form\SettingsFormDataProvider'
+            - 'PrestaShop\Module\PpCloudflare\Form\SettingsType'
+            - 'PpCloudflareSettings'
+            - 'ppcloudflare_settings'

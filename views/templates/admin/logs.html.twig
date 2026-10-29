@@ -1,0 +1,144 @@
+{% extends '@Modules/ppcloudflare/views/templates/admin/_layout.html.twig' %}
+
+{% block ppcf_content %}
+  <div class="card">
+    <h3 class="card-header">
+      <i class="material-icons">filter_list</i>
+      {{ 'Filters'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+    </h3>
+    <div class="card-body">
+      <form method="get" action="{{ path('ps_ppcloudflare_logs') }}" class="ppcf-filters">
+        {# keep the admin token of the current URL #}
+        {% if app.request.query.get('_token') %}<input type="hidden" name="_token" value="{{ app.request.query.get('_token') }}">{% endif %}
+        <div class="row">
+          <div class="col-md-3">
+            <label class="form-control-label" for="ppcf-f-success">{{ 'Status'|trans({}, 'Modules.Ppcloudflare.Admin') }}</label>
+            <select name="success" id="ppcf-f-success" class="custom-select">
+              <option value="">{{ 'All'|trans({}, 'Modules.Ppcloudflare.Admin') }}</option>
+              <option value="1"{{ filters.success == '1' ? ' selected' : '' }}>{{ 'Success'|trans({}, 'Modules.Ppcloudflare.Admin') }}</option>
+              <option value="0"{{ filters.success == '0' ? ' selected' : '' }}>{{ 'Error'|trans({}, 'Modules.Ppcloudflare.Admin') }}</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-control-label" for="ppcf-f-shop">{{ 'Shop'|trans({}, 'Modules.Ppcloudflare.Admin') }}</label>
+            <select name="id_shop" id="ppcf-f-shop" class="custom-select">
+              <option value="">{{ 'All'|trans({}, 'Modules.Ppcloudflare.Admin') }}</option>
+              {% for id, name in shops %}
+                <option value="{{ id }}"{{ filters.id_shop == id ? ' selected' : '' }}>{{ name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-control-label" for="ppcf-f-action">{{ 'Action'|trans({}, 'Modules.Ppcloudflare.Admin') }}</label>
+            <select name="action" id="ppcf-f-action" class="custom-select">
+              <option value="">{{ 'All'|trans({}, 'Modules.Ppcloudflare.Admin') }}</option>
+              {% for action in actions %}
+                <option value="{{ action }}"{{ filters.action == action ? ' selected' : '' }}>{{ action }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-3 d-flex align-items-end ppcf-filter-buttons">
+            <button type="submit" class="btn btn-primary">
+              <i class="material-icons">search</i>
+              {{ 'Filter'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+            </button>
+            {% if query is not empty %}
+              <a href="{{ path('ps_ppcloudflare_logs') }}" class="btn btn-link">{{ 'Reset'|trans({}, 'Modules.Ppcloudflare.Admin') }}</a>
+            {% endif %}
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 class="card-header d-flex align-items-center justify-content-between">
+      <span>
+        <i class="material-icons">history</i>
+        {{ 'Purge log'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+        <span class="badge badge-secondary">{{ total }}</span>
+      </span>
+      <form method="post" action="{{ path('ps_ppcloudflare_logs_clear') }}" class="ppcf-confirm"
+            data-confirm="{{ 'Delete every log entry?'|trans({}, 'Modules.Ppcloudflare.Admin') }}">
+        {% include '@Modules/ppcloudflare/views/templates/admin/_csrf.html.twig' %}
+        <button type="submit" class="btn btn-outline-danger btn-sm"{{ total == 0 ? ' disabled' : '' }}>
+          <i class="material-icons">delete</i>
+          {{ 'Clear log'|trans({}, 'Modules.Ppcloudflare.Admin') }}
+        </button>
+      </form>
+    </h3>
+    <div class="card-body">
+      {% if rows is empty %}
+        <p class="text-muted mb-0">{{ 'No log entries.'|trans({}, 'Modules.Ppcloudflare.Admin') }}</p>
+      {% else %}
+        <div class="table-responsive">
+          <table class="table table-striped ppcf-log">
+            <thead>
+              <tr>
+                <th>{{ 'Date'|trans({}, 'Modules.Ppcloudflare.Admin') }}</th>
+                <th>{{ 'Shop'|trans({}, 'Modules.Ppcloudflare.Admin') }}</th>
+                <th>{{ 'Zone'|trans({}, 'Modules.Ppcloudflare.Admin') }}</th>
+                <th>{{ 'Action'|trans({}, 'Modules.Ppcloudflare.Admin') }}</th>
+                <th>{{ 'Trigger'|trans({}, 'Modules.Ppcloudflare.Admin') }}</th>
+                <th>{{ 'Items'|trans({}, 'Modules.Ppcloudflare.Admin') }}</th>
+                <th>{{ 'Result'|trans({}, 'Modules.Ppcloudflare.Admin') }}</th>
+                <th>{{ 'Message'|trans({}, 'Modules.Ppcloudflare.Admin') }}</th>
+                <th>{{ 'Employee'|trans({}, 'Modules.Ppcloudflare.Admin') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in rows %}
+                <tr>
+                  <td class="text-nowrap">{{ row.date_add }}</td>
+                  <td>{{ row.id_shop ? (row.shop_name ?: '#' ~ row.id_shop) : '-' }}</td>
+                  <td><code class="ppcf-zone-id" title="{{ row.zone_id }}">{{ row.zone_id ? row.zone_id|slice(0, 8) ~ '…' : '-' }}</code></td>
+                  <td>{{ row.action }}</td>
+                  <td>{{ row.trigger_source }}</td>
+                  <td>
+                    {% if row.items is empty %}
+                      <span class="text-muted">0</span>
+                    {% else %}
+                      <details>
+                        <summary>{{ row.items|length }}</summary>
+                        <ul class="ppcf-items">
+                          {% for item in row.items %}<li>{{ item }}</li>{% endfor %}
+                        </ul>
+                      </details>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if row.success %}
+                      <span class="badge badge-success">{{ 'Success'|trans({}, 'Modules.Ppcloudflare.Admin') }}</span>
+                    {% else %}
+                      <span class="badge badge-danger">{{ 'Error'|trans({}, 'Modules.Ppcloudflare.Admin') }}</span>
+                    {% endif %}
+                  </td>
+                  <td class="ppcf-message">{{ row.message }}</td>
+                  <td>{{ row.id_employee ? (row.employee_name ?: '#' ~ row.id_employee) : '-' }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        {% if totalPages > 1 %}
+          <nav aria-label="{{ 'Pagination'|trans({}, 'Modules.Ppcloudflare.Admin') }}">
+            <ul class="pagination justify-content-center mb-0">
+              <li class="page-item{{ page <= 1 ? ' disabled' : '' }}">
+                <a class="page-link" href="{{ path('ps_ppcloudflare_logs', query|merge({'page': max(1, page - 1)})) }}">&laquo;</a>
+              </li>
+              {% for p in max(1, page - 3)..min(totalPages, page + 3) %}
+                <li class="page-item{{ p == page ? ' active' : '' }}">
+                  <a class="page-link" href="{{ path('ps_ppcloudflare_logs', query|merge({'page': p})) }}">{{ p }}</a>
+                </li>
+              {% endfor %}
+              <li class="page-item{{ page >= totalPages ? ' disabled' : '' }}">
+                <a class="page-link" href="{{ path('ps_ppcloudflare_logs', query|merge({'page': min(totalPages, page + 1)})) }}">&raquo;</a>
+              </li>
+            </ul>
+          </nav>
+        {% endif %}
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
